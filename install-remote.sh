@@ -64,13 +64,18 @@ function update_installation() {
     cd "$INSTALL_DIR"
 
     print_info "Forçando a sincronização com o repositório Git (descartando alterações locais)..."
-    # Fetch all changes from origin
     sudo -u "$APP_USER" git fetch origin
-    # Reset the local branch to match the remote, discarding any local changes
     sudo -u "$APP_USER" git reset --hard origin/main
-    # Clean untracked and ignored files to ensure a pristine state
-    sudo -u "$APP_USER" git clean -fdx
+    # The 'git clean' command was removed as it was too destructive for a standard update.
 
+    # Ensure the virtual environment exists, recreating it if necessary.
+    # This adds resilience to the script.
+    if [ ! -f "venv/bin/activate" ]; then
+        print_warning "Ambiente virtual não encontrado. Recriando..."
+        sudo -u "$APP_USER" python3 -m venv venv
+        print_success "Ambiente virtual recriado."
+    fi
+    
     print_info "Ativando ambiente virtual e atualizando dependências como '$APP_USER'..."
     # Executa a instalação de dependências dentro de um sub-shell como o usuário correto
     sudo -u "$APP_USER" bash -c "source venv/bin/activate && pip install -r requirements.txt"
