@@ -83,6 +83,9 @@ function update_installation() {
     print_info "Reiniciando a aplicação via Supervisor..."
     supervisorctl restart sambaqui
 
+    print_info "Reiniciando o Nginx para limpar caches e aplicar novas configurações..."
+    systemctl restart nginx
+
     print_success "Aplicação atualizada com sucesso!"
     sleep 2
     supervisorctl status sambaqui
