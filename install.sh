@@ -319,12 +319,20 @@ if [ "$USE_HTTPS" = "s" ] || [ "$USE_HTTPS" = "S" ]; then
     # Instalar Certbot
     apt-get install -y certbot python3-certbot-nginx
     
-    # Gerar certificado
-    print_info "Gerando certificado SSL para $SERVER_HOST..."
-    certbot certonly --standalone -d "$SERVER_HOST" --agree-tos --register-unsafely-without-email --non-interactive || true
-    
-    # Atualizar Nginx para HTTPS
-    cat > /etc/nginx/sites-available/sambaqui << EOF
+    # Verificar porta 80
+    if ss -ltnp | grep -q ':80'; then
+        print_warning "A porta 80 já está em uso. Certbot não poderá validar o domínio com standalone."
+        print_warning "Se você quiser HTTPS, pare o serviço atual que usa a porta 80 e execute o script novamente."
+    else
+        # Parar temporariamente o Nginx para liberar a porta 80, se necessário
+        systemctl stop nginx || true
+        
+        print_info "Gerando certificado SSL para $SERVER_HOST..."
+        if certbot certonly --standalone -d "$SERVER_HOST" --agree-tos --register-unsafely-without-email --non-interactive; then
+            print_success "Certificado gerado com sucesso"
+            
+            # Atualizar Nginx para HTTPS
+            cat > /etc/nginx/sites-available/sambaqui << EOF
 server {
     listen 80;
     server_name $SERVER_HOST;
@@ -354,10 +362,15 @@ server {
     }
 }
 EOF
-
-    nginx -t
-    systemctl restart nginx
-    print_success "SSL/TLS configurado"
+            
+            nginx -t
+            systemctl restart nginx
+            print_success "SSL/TLS configurado"
+        else
+            print_error "Falha ao gerar certificado SSL. Mantendo configuração HTTP para evitar erro no Nginx."
+            systemctl start nginx || true
+        fi
+    fi
 fi
 
 # ============================================================================
