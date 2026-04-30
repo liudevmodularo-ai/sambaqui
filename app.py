@@ -354,6 +354,20 @@ def admin_seo():
     }
     return render_template('admin/seo.html', stats=stats)
 
+# ---- API Endpoints ----
+
+@app.route('/contact-submit', methods=['POST'])
+def contact_submit():
+    """Endpoint para formulário de contato AJAX"""
+    email = request.form.get('email')
+    if not email:
+        return jsonify({'sucesso': False, 'mensagem': 'O e-mail é obrigatório.'}), 400
+    
+    # Aqui você adicionaria a lógica para salvar no banco ou enviar um e-mail
+    print(f"Novo lead recebido: {email}")
+    
+    return jsonify({'sucesso': True, 'mensagem': 'Obrigado! Entraremos em contato em breve.'})
+
 # ==================== ROTAS DE ARQUIVOS ====================
 
 @app.route('/static/uploads/<filename>')

@@ -11,9 +11,11 @@ def is_admin_logged_in():
 
 def login_admin(username, password):
     """Valida credenciais de admin"""
-    if (username == current_app.config['ADMIN_USERNAME'] and 
-        password == current_app.config['ADMIN_PASSWORD']):
-        return True
+    # NUNCA compare senhas em texto plano. Use hashes.
+    stored_username = current_app.config['ADMIN_USERNAME']
+    stored_password_hash = current_app.config['ADMIN_PASSWORD_HASH']
+    if username == stored_username and check_password_hash(stored_password_hash, password):
+        return True 
     return False
 
 def require_admin(f):

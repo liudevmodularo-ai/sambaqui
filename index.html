@@ -92,6 +92,13 @@
   }
   .nav-toggle .hamburger::before { top: -8px; }
   .nav-toggle .hamburger::after { bottom: -8px; }
+  .mobile-nav.open ~ nav .nav-toggle .hamburger { background: transparent; }
+  .mobile-nav.open ~ nav .nav-toggle .hamburger::before { top: 0; transform: rotate(45deg); }
+  .mobile-nav.open ~ nav .nav-toggle .hamburger::after { bottom: 0; transform: rotate(-45deg); }
+  .mobile-nav.open ~ nav .nav-toggle { z-index: 1100; }
+  .mobile-nav.open ~ nav .nav-toggle .hamburger, .mobile-nav.open ~ nav .nav-toggle .hamburger::before, .mobile-nav.open ~ nav .nav-toggle .hamburger::after {
+    background: var(--gold);
+  }
 
   /* ── HERO ── */
   .hero {
@@ -444,7 +451,7 @@
     margin: 0 auto 2.5rem;
     line-height: 1.8;
   }
-  .cta-form {
+  #ctaForm {
     display: flex; gap: 0;
     max-width: 440px;
     margin: 0 auto 1.2rem;
@@ -452,7 +459,7 @@
     border-radius: 3px;
     overflow: hidden;
   }
-  .cta-form input {
+  #ctaForm input {
     flex: 1;
     background: rgba(255,255,255,.07);
     border: none; outline: none;
@@ -461,8 +468,8 @@
     font-family: 'Raleway', sans-serif;
     font-size: .88rem;
   }
-  .cta-form input::placeholder { color: rgba(255,255,255,.35); }
-  .cta-form button {
+  #ctaForm input::placeholder { color: rgba(255,255,255,.35); }
+  #ctaForm button {
     background: var(--gold);
     border: none;
     padding: .9rem 1.8rem;
@@ -473,8 +480,10 @@
     cursor: pointer;
     transition: background .3s;
   }
-  .cta-form button:hover { background: var(--gold-light); }
-  .cta-note { font-size: .75rem; color: rgba(255,255,255,.3); }
+  #ctaForm button:hover:not(:disabled) { background: var(--gold-light); }
+  #ctaForm button:disabled { background: var(--gold-light); cursor: wait; }
+  .cta-note { font-size: .75rem; color: rgba(255,255,255,.3); min-height: 1.2em; }
+  .cta-note.success { color: #a5d6a7; } .cta-note.error { color: #ef9a9a; }
 
   /* ── FOOTER ── */
   footer {
@@ -715,7 +724,7 @@
     <li><a href="#location">Localização</a></li>
   </ul>
   <a class="nav-cta" href="#contato">Solicitar Contato</a>
-  <button class="nav-toggle" id="navToggle">
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-controls="mobileNav" aria-expanded="false">
     <span class="hamburger"></span>
   </button>
 </nav>
@@ -1143,12 +1152,12 @@
     <span class="section-tag">Entre em contato</span>
     <h2 class="section-title">Garanta sua Unidade</h2>
   </div>
-  <p>Unidades limitadas. Preencha com seu e-mail e nossa equipe entrará em contato com todas as informações, plantas e condições especiais.</p>
-  <div class="cta-form reveal">
-    <input type="email" placeholder="Seu melhor e-mail" />
-    <button type="button">Solicitar Contato</button>
-  </div>
-  <p class="cta-note">Ou ligue: (41) 9746-2734 · Pagamento direto com a construtora</p>
+  <p id="ctaDesc">Unidades limitadas. Preencha com seu e-mail e nossa equipe entrará em contato com todas as informações, plantas e condições especiais.</p>
+  <form id="ctaForm" class="reveal">
+    <input type="email" id="ctaEmail" placeholder="Seu melhor e-mail" required />
+    <button type="submit" id="ctaButton">Solicitar Contato</button>
+  </form>
+  <p class="cta-note" id="ctaNote">Ou ligue: (41) 9746-2734 · Pagamento direto com a construtora</p>
 </section>
 
 <!-- FOOTER -->
@@ -1289,10 +1298,42 @@ window.addEventListener('scroll', () => {
 const navToggle = document.getElementById('navToggle');
 const mobileNav = document.getElementById('mobileNav');
 navToggle.addEventListener('click', () => {
-  mobileNav.classList.toggle('open');
+  const isOpen = mobileNav.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 });
 mobileNav.addEventListener('click', (e) => {
-  if (e.target.tagName === 'A') mobileNav.classList.remove('open');
+  if (e.target.tagName === 'A') {
+    mobileNav.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+});
+
+// ── CTA FORM AJAX ──
+const ctaForm = document.getElementById('ctaForm');
+const ctaEmail = document.getElementById('ctaEmail');
+const ctaButton = document.getElementById('ctaButton');
+const ctaNote = document.getElementById('ctaNote');
+
+ctaForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  ctaButton.disabled = true;
+  ctaButton.textContent = 'Enviando...';
+  ctaNote.textContent = '';
+  ctaNote.className = 'cta-note';
+
+  const formData = new FormData();
+  formData.append('email', ctaEmail.value);
+
+  fetch('/contact-submit', { method: 'POST', body: formData })
+    .then(res => res.json())
+    .then(data => {
+      ctaNote.textContent = data.mensagem;
+      ctaNote.classList.add(data.sucesso ? 'success' : 'error');
+      if (data.sucesso) ctaForm.reset();
+    })
+    .finally(() => { ctaButton.disabled = false; ctaButton.textContent = 'Solicitar Contato'; });
 });
 </script>
 </body>
