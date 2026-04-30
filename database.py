@@ -121,6 +121,12 @@ def init_db(app):
                     descricao='Endereço completo do empreendimento para o mapa e localização'
                 ),
                 Configuracao(
+                    chave='site_endereco_curto',
+                    valor='Rua Mal. Floriano Peixoto, 483 · Centro',
+                    tipo='string',
+                    descricao='Endereço curto para exibição no hero e outros locais'
+                ),
+                Configuracao(
                     chave='seo_google_analytics',
                     valor='',
                     tipo='string',
@@ -137,6 +143,16 @@ def init_db(app):
                 valor='Avenida Atlântica, 1234, Guaratuba, PR, Brasil',
                 tipo='string',
                 descricao='Endereço completo do empreendimento para o mapa e localização'
+            ))
+            db.session.commit()
+        
+        # Garante que o endereço curto do site exista
+        if Configuracao.query.filter_by(chave='site_endereco_curto').first() is None:
+            db.session.add(Configuracao(
+                chave='site_endereco_curto',
+                valor='Rua Mal. Floriano Peixoto, 483 · Centro',
+                tipo='string',
+                descricao='Endereço curto para exibição no hero e outros locais'
             ))
             db.session.commit()
         

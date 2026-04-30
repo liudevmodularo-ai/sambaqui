@@ -410,11 +410,13 @@ def server_error(error):
 @app.context_processor
 def inject_config():
     """Injeta configurações em todos os templates"""
-    return dict(
-        config=get_all_configs(),
-        admin_logged_in=is_admin_logged_in(),
-        admin_user=session.get('admin_user')
-    )
+    all_configs = get_all_configs()
+    all_configs['current_year'] = datetime.now().year # Adiciona o ano atual
+    return {
+        'config': all_configs,
+        'admin_logged_in': is_admin_logged_in(),
+        'admin_user': session.get('admin_user')
+    }
 
 # ==================== INICIALIZAÇÃO ====================
 
