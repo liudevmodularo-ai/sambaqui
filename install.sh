@@ -89,20 +89,32 @@ fi
 
 print_header "❓ CONFIGURAÇÃO DE DEPLOY"
 
-read -p "$(echo -e ${YELLOW}'Diretório de instalação (default: /var/www/sambaqui): '${NC})" INSTALL_DIR
-INSTALL_DIR=${INSTALL_DIR:-/var/www/sambaqui}
-
-read -p "$(echo -e ${YELLOW}'Usuário do sistema (default: www-data): '${NC})" APP_USER
-APP_USER=${APP_USER:-www-data}
-
-read -p "$(echo -e ${YELLOW}'Porta da aplicação (default: 5000): '${NC})" APP_PORT
-APP_PORT=${APP_PORT:-5000}
-
-read -p "$(echo -e ${YELLOW}'Domínio/IP do servidor (ex: example.com ou 192.168.1.1): '${NC})" SERVER_HOST
-SERVER_HOST=${SERVER_HOST:-localhost}
-
-read -p "$(echo -e ${YELLOW}'Usar HTTPS? (s/n, default: n): '${NC})" USE_HTTPS
-USE_HTTPS=${USE_HTTPS:-n}
+if [ -f ".env" ]; then
+    print_info "Arquivo .env encontrado. Carregando configurações..."
+    set -o allexport
+    source .env
+    set +o allexport
+    
+    # Usar valores do .env ou defaults
+    INSTALL_DIR=${INSTALL_DIR:-/var/www/sambaqui}
+    APP_USER=${APP_USER:-www-data}
+    APP_PORT=${APP_PORT:-5000}
+    SERVER_HOST=${SERVER_HOST:-localhost}
+    USE_HTTPS=${USE_HTTPS:-n}
+    SSL_EMAIL=${SSL_EMAIL:-""}
+    GIT_REPO=${GIT_REPO:-""}
+else
+    print_warning "Arquivo .env não encontrado. Usando modo interativo."
+    read -p "$(echo -e ${YELLOW}'Diretório de instalação (default: /var/www/sambaqui): '${NC})" INSTALL_DIR
+    INSTALL_DIR=${INSTALL_DIR:-/var/www/sambaqui}
+    read -p "$(echo -e ${YELLOW}'Usuário do sistema (default: www-data): '${NC})" APP_USER
+    APP_USER=${APP_USER:-www-data}
+    read -p "$(echo -e ${YELLOW}'Porta da aplicação (default: 5000): '${NC})" APP_PORT
+    APP_PORT=${APP_PORT:-5000}
+    read -p "$(echo -e ${YELLOW}'Domínio/IP do servidor (ex: example.com): '${NC})" SERVER_HOST
+    read -p "$(echo -e ${YELLOW}'Usar HTTPS? (s/n, default: n): '${NC})" USE_HTTPS
+    [ "$USE_HTTPS" = "s" ] && read -p "$(echo -e ${YELLOW}'Email para SSL (ex: dev@synapt.com.br): '${NC})" SSL_EMAIL
+fi
 
 # ============================================================================
 # INSTALAÇÃO DE DEPENDÊNCIAS DO SISTEMA
@@ -143,13 +155,13 @@ print_success "Diretórios criados em $INSTALL_DIR"
 
 print_header "📥 PREPARANDO ARQUIVOS DA APLICAÇÃO"
 
-# Se o script foi executado do diretório do projeto
-if [ -f "./app.py" ]; then
-    print_info "Copiando arquivos do projeto..."
-    cp -r ./* "$INSTALL_DIR/" 2>/dev/null || true
+# Se GIT_REPO está definido, clona. Senão, copia.
+if [ -n "$GIT_REPO" ]; then
+    print_info "Clonando repositório de $GIT_REPO..."
+    git clone "$GIT_REPO" "$INSTALL_DIR"
 else
-    print_warning "Arquivos da aplicação não encontrados no diretório atual."
-    print_info "Certifique-se de que os arquivos estão em $INSTALL_DIR"
+    print_info "Copiando arquivos do diretório atual..."
+    cp -r ./* "$INSTALL_DIR/" 2>/dev/null || true
 fi
 
 # ============================================================================
@@ -324,14 +336,11 @@ if [ "$USE_HTTPS" = "s" ] || [ "$USE_HTTPS" = "S" ]; then
         print_warning "A porta 80 já está em uso. Certbot não poderá validar o domínio com standalone."
         print_warning "Se você quiser HTTPS, pare o serviço atual que usa a porta 80 e execute o script novamente."
     else
-        # Parar temporariamente o Nginx para liberar a porta 80, se necessário
-        systemctl stop nginx || true
-        
         print_info "Gerando certificado SSL para $SERVER_HOST..."
-        if certbot certonly --standalone -d "$SERVER_HOST" --agree-tos --register-unsafely-without-email --non-interactive; then
+        if certbot --nginx -d "$SERVER_HOST" --agree-tos -m "$SSL_EMAIL" --non-interactive; then
             print_success "Certificado gerado com sucesso"
             
-            # Atualizar Nginx para HTTPS
+            # O Certbot já deve ter modificado o arquivo do Nginx. Vamos garantir que está correto.
             cat > /etc/nginx/sites-available/sambaqui << EOF
 server {
     listen 80;
@@ -343,8 +352,8 @@ server {
     listen 443 ssl http2;
     server_name $SERVER_HOST;
 
-    ssl_certificate /etc/letsencrypt/live/$SERVER_HOST/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$SERVER_HOST/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$SERVER_HOST/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/$SERVER_HOST/privkey.pem; # managed by Certbot
 
     client_max_body_size 16M;
 
@@ -367,7 +376,7 @@ EOF
             systemctl restart nginx
             print_success "SSL/TLS configurado"
         else
-            print_error "Falha ao gerar certificado SSL. Mantendo configuração HTTP para evitar erro no Nginx."
+            print_error "Falha ao gerar certificado SSL. Verifique os logs do Certbot. Mantendo configuração HTTP."
             systemctl start nginx || true
         fi
     fi
