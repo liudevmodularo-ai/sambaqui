@@ -63,8 +63,13 @@ function update_installation() {
     
     cd "$INSTALL_DIR"
 
-    print_info "Puxando as últimas atualizações do repositório Git como usuário '$APP_USER'..."
-    sudo -u "$APP_USER" git pull origin main || sudo -u "$APP_USER" git pull
+    print_info "Forçando a sincronização com o repositório Git (descartando alterações locais)..."
+    # Fetch all changes from origin
+    sudo -u "$APP_USER" git fetch origin
+    # Reset the local branch to match the remote, discarding any local changes
+    sudo -u "$APP_USER" git reset --hard origin/main
+    # Clean untracked and ignored files to ensure a pristine state
+    sudo -u "$APP_USER" git clean -fdx
 
     print_info "Ativando ambiente virtual e atualizando dependências como '$APP_USER'..."
     # Executa a instalação de dependências dentro de um sub-shell como o usuário correto
