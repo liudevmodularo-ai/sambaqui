@@ -115,6 +115,12 @@ def init_db(app):
                     descricao='Telefone de contato'
                 ),
                 Configuracao(
+                    chave='site_endereco',
+                    valor='Avenida Atlântica, 1234, Guaratuba, PR, Brasil',
+                    tipo='string',
+                    descricao='Endereço completo do empreendimento para o mapa e localização'
+                ),
+                Configuracao(
                     chave='seo_google_analytics',
                     valor='',
                     tipo='string',
@@ -122,6 +128,16 @@ def init_db(app):
                 ),
             ]
             db.session.add_all(configs)
+            db.session.commit()
+        
+        # Garante que o endereço do site exista mesmo em bases antigas
+        if Configuracao.query.filter_by(chave='site_endereco').first() is None:
+            db.session.add(Configuracao(
+                chave='site_endereco',
+                valor='Avenida Atlântica, 1234, Guaratuba, PR, Brasil',
+                tipo='string',
+                descricao='Endereço completo do empreendimento para o mapa e localização'
+            ))
             db.session.commit()
         
         # Insere página inicial se não existir

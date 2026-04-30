@@ -5,6 +5,7 @@ MVP com painel administrativo, gerenciamento de conteúdo e SEO
 import os
 import json
 from functools import wraps
+from urllib.parse import quote_plus
 from flask import (Flask, render_template, request, session, redirect, 
                    url_for, jsonify, flash, send_from_directory)
 from flask_sqlalchemy import SQLAlchemy
@@ -45,7 +46,16 @@ def get_all_configs():
 def index():
     """Página inicial - Landing page"""
     config_dict = get_all_configs()
-    return render_template('index.html', config=config_dict)
+    address = config_dict.get('site_endereco', 'Avenida Atlântica, 1234, Guaratuba, PR, Brasil')
+    address_query = quote_plus(address)
+    map_search_url = f'https://www.google.com/maps/search/?api=1&query={address_query}'
+    map_embed_url = f'https://www.google.com/maps?q={address_query}&output=embed'
+    return render_template(
+        'index.html', config=config_dict,
+        location_address=address,
+        map_search_url=map_search_url,
+        map_embed_url=map_embed_url
+    )
 
 @app.route('/page/<slug>')
 def view_page(slug):
