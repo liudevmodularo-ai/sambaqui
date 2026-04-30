@@ -11,6 +11,7 @@ set -e
 # --- CONFIGURAÇÕES ---
 GIT_REPO="https://github.com/liudevmodularo-ai/sambaqui.git"
 INSTALL_DIR="/var/www/sambaqui"
+APP_USER="www-data" # O usuário que roda a aplicação (padrão do install.sh)
 # --- FIM DAS CONFIGURAÇÕES ---
 
 # Cores
@@ -62,13 +63,12 @@ function update_installation() {
     
     cd "$INSTALL_DIR"
 
-    print_info "Puxando as últimas atualizações do repositório Git..."
-    git pull origin main || git pull # Tenta com 'main' e depois sem
+    print_info "Puxando as últimas atualizações do repositório Git como usuário '$APP_USER'..."
+    sudo -u "$APP_USER" git pull origin main || sudo -u "$APP_USER" git pull
 
-    print_info "Ativando ambiente virtual e atualizando dependências..."
-    source venv/bin/activate
-    pip install -r requirements.txt
-    deactivate
+    print_info "Ativando ambiente virtual e atualizando dependências como '$APP_USER'..."
+    # Executa a instalação de dependências dentro de um sub-shell como o usuário correto
+    sudo -u "$APP_USER" bash -c "source venv/bin/activate && pip install -r requirements.txt"
 
     print_info "Reiniciando a aplicação via Supervisor..."
     supervisorctl restart sambaqui
