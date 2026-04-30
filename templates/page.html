@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.titulo }} - Sambaqui Tower House{% endblock %}
+{% block meta_description %}{{ page.meta_descricao }}{% endblock %}
+{% block meta_keywords %}{{ page.meta_keywords }}{% endblock %}
+
+{% block styles %}
+  :root {
+    --navy: #0b1f35;
+    --gold: #c9a96e;
+    --sand: #f5f0e8;
+    --white: #ffffff;
+    --text-dark: #1a1a2e;
+    --text-muted: #6b7a8d;
+  }
+
+  body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--text-dark);
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, var(--navy) 0%, #0d2a45 100%);
+    color: white;
+    padding: 8rem 2rem 3rem;
+    text-align: center;
+    margin-top: 50px;
+  }
+
+  body:not(.admin-active) .page-header {
+    margin-top: 0;
+  }
+
+  .page-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-content {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+
+  .page-content h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    margin: 2rem 0 1rem;
+    color: var(--navy);
+  }
+
+  .page-content p {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+  }
+
+  .admin-actions {
+    text-align: center;
+    padding: 2rem;
+    background: var(--sand);
+    margin-top: 3rem;
+    border-radius: 4px;
+  }
+
+  .btn-edit {
+    padding: 0.7rem 1.5rem;
+    background: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 2px;
+    margin-right: 0.5rem;
+    display: inline-block;
+  }
+
+  .btn-edit:hover {
+    background: #1976D2;
+  }
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ page.titulo }}</h1>
+</div>
+
+<div class="page-content">
+  {{ page.conteudo|safe }}
+  
+  {% if admin_logged_in %}
+  <div class="admin-actions">
+    <a href="{{ url_for('admin_pagina_editar', id=page.id) }}" class="btn-edit">✏️ Editar Página</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

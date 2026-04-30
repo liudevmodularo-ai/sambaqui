@@ -1,0 +1,90 @@
+{% if edit %}
+  {% set title = "Editar Página" %}
+  {% set action = url_for('admin_pagina_editar', id=pagina.id) %}
+{% else %}
+  {% set title = "Nova Página" %}
+  {% set action = url_for('admin_pagina_nova') %}
+{% endif %}
+
+{% extends "admin/dashboard.html" %}
+
+{% block title %}{{ title }} - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <ul class="admin-menu">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_paginas') }}" class="active">📄 Páginas</a></li>
+      <li><a href="{{ url_for('admin_imagens') }}">🖼️ Imagens</a></li>
+      <li><a href="{{ url_for('admin_configuracoes') }}">⚙️ Configurações</a></li>
+      <li><a href="{{ url_for('admin_seo') }}">🔍 SEO</a></li>
+      <li><hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.2);"></li>
+      <li><a href="{{ url_for('index') }}">🏠 Ver Site</a></li>
+      <li><a href="{{ url_for('admin_logout') }}" style="color: #ff6b6b;">🚪 Sair</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <div class="admin-header">
+      <h1>{{ "✏️" if edit else "📝" }} {{ title }}</h1>
+    </div>
+    
+    <form method="POST" action="{{ action }}" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%;">
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--navy);">
+          Título da Página *
+        </label>
+        <input type="text" name="titulo" required 
+               value="{{ pagina.titulo if pagina else '' }}"
+               placeholder="Ex: Sobre Nós"
+               style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--navy);">
+          Conteúdo (HTML) *
+        </label>
+        <textarea name="conteudo" required rows="10"
+                  placeholder="Digite o conteúdo da página (HTML permitido)"
+                  style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">{{ pagina.conteudo if pagina else '' }}</textarea>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--navy);">
+          Meta Descrição (SEO)
+        </label>
+        <textarea name="meta_descricao" rows="3"
+                  placeholder="Máximo 160 caracteres para aparecer no Google"
+                  style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">{{ pagina.meta_descricao if pagina else '' }}</textarea>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--navy);">
+          Palavras-chave (SEO)
+        </label>
+        <input type="text" name="meta_keywords"
+               value="{{ pagina.meta_keywords if pagina else '' }}"
+               placeholder="Separe as palavras-chave por vírgula"
+               style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+      </div>
+      
+      {% if edit %}
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center;">
+        <input type="checkbox" id="ativa" name="ativa" 
+               {% if pagina.ativa %}checked{% endif %}
+               style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="ativa" style="margin: 0 0 0 0.5rem; cursor: pointer; font-weight: 600; color: var(--navy);">
+          Página Ativa
+        </label>
+      </div>
+      {% endif %}
+      
+      <div style="display: flex; gap: 1rem;">
+        <button type="submit" class="btn btn-success" style="flex: 1;">💾 Salvar</button>
+        <a href="{{ url_for('admin_paginas') }}" class="btn" style="background: #999; color: white; flex: 1; text-align: center;">Cancelar</a>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block title %}{{ config.get('site_titulo', 'Sambaqui Tower House') }} – Guaratuba{% endblock %}
+
+{% block meta_description %}{{ config.get('site_descricao', 'Empreendimento de alta qualidade em Guaratuba') }}{% endblock %}
+
+{% block styles %}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0b1f35;
+    --navy-light: #142d4c;
+    --gold: #c9a96e;
+    --gold-light: #e8d5b0;
+    --sand: #f5f0e8;
+    --white: #ffffff;
+    --text-dark: #1a1a2e;
+    --text-muted: #6b7a8d;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--text-dark);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  .admin-bar {
+    background: #1a1a1a;
+    color: white;
+    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+  
+  .admin-bar-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.5rem 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .admin-bar a {
+    color: #4CAF50;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .admin-bar a:hover {
+    color: #66BB6A;
+  }
+
+  .flash-messages {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    z-index: 999;
+    max-width: 400px;
+  }
+  
+  .flash {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    animation: slideIn 0.3s ease;
+  }
+  
+  .flash-success {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .flash-error {
+    background: #f44336;
+    color: white;
+  }
+  
+  .flash-info {
+    background: #2196F3;
+    color: white;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 50px; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(11, 31, 53, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,169,110,0.2);
+    transition: all .3s;
+  }
+  
+  body:not(.admin-active) nav {
+    top: 0;
+  }
+  
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    transition: color .3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    padding: .55rem 1.6rem;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background .3s;
+  }
+  .nav-cta:hover { background: var(--gold-light); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: var(--navy);
+    margin-top: 50px;
+  }
+  
+  body:not(.admin-active) .hero {
+    margin-top: 0;
+  }
+  
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 110%, rgba(20,80,120,.5) 0%, transparent 70%),
+      linear-gradient(160deg, #0b1f35 0%, #0d2a45 40%, #0b1f35 100%);
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='1' cy='1' r='.6' fill='rgba(201,169,110,.07)'/%3E%3C/svg%3E");
+  }
+  .wave-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 120px; overflow: hidden;
+  }
+  .wave-bottom svg { width: 100%; height: 100%; }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    max-width: 900px;
+    padding: 0 2rem;
+    animation: fadeUp .9s ease both;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .25em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.6rem;
+    padding: .4rem 1.2rem;
+    border: 1px solid rgba(201,169,110,.35);
+    border-radius: 2px;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.4rem, 7vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: .4rem;
+    letter-spacing: -.01em;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    font-size: 1rem; font-weight: 300;
+    color: rgba(255,255,255,.55);
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .hero-line {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    margin-bottom: 2.8rem;
+  }
+  .hero-line::before, .hero-line::after {
+    content: ''; flex: 1; max-width: 120px;
+    height: 1px; background: rgba(201,169,110,.4);
+  }
+  .hero-line span {
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(255,255,255,.5);
+  }
+  .hero-desc {
+    font-size: 1.05rem; font-weight: 300;
+    color: rgba(255,255,255,.7);
+    line-height: 1.8;
+    max-width: 600px;
+    margin: 0 auto 2.8rem;
+  }
+  .hero-actions { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    padding: .9rem 2.8rem;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: .82rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all .3s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-outline {
+    padding: .9rem 2.8rem;
+    border: 1px solid rgba(255,255,255,.35);
+    color: rgba(255,255,255,.8);
+    font-size: .82rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: all .3s;
+    cursor: pointer;
+    background: transparent;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+  .hero-stats {
+    position: absolute; bottom: 140px; left: 0; right: 0; z-index: 3;
+    display: flex; justify-content: center; gap: 3rem;
+    flex-wrap: wrap; padding: 0 2rem;
+  }
+  .stat {
+    text-align: center;
+    animation: fadeUp .9s ease both;
+  }
+  .stat:nth-child(1) { animation-delay: .2s }
+  .stat:nth-child(2) { animation-delay: .3s }
+  .stat:nth-child(3) { animation-delay: .4s }
+  .stat:nth-child(4) { animation-delay: .5s }
+  .stat-num {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem; font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+    margin-top: .3rem;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 6rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-dark);
+  }
+
+  .section-title em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .section-description {
+    text-align: center;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.8;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .feature-card {
+    padding: 2rem;
+    background: var(--sand);
+    border-left: 3px solid var(--gold);
+    transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+
+  .feature-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--navy);
+  }
+
+  .feature-card p {
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    color: rgba(255,255,255,.7);
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(201,169,110,.2);
+    margin-top: 4rem;
+  }
+
+  .footer-content p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .footer-content p:first-child {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    nav {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem 2rem;
+    }
+    .nav-links {
+      gap: 1rem;
+    }
+    .hero {
+      margin-top: 120px;
+    }
+    .section {
+      padding: 3rem 1.5rem;
+    }
+  }
+{% endblock %}
+
+{% block content %}
+<!-- NAVEGAÇÃO -->
+<nav>
+  <a href="/" class="nav-logo">SAMBAQUI</a>
+  <ul class="nav-links">
+    <li><a href="/#features">Características</a></li>
+    <li><a href="/#localizacao">Localização</a></li>
+    <li><a href="/#contato">Contato</a></li>
+  </ul>
+  <a href="#contato" class="nav-cta">Solicitar Info</a>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  
+  <div class="hero-content">
+    <div class="hero-tag">EMPREENDIMENTO PREMIUM</div>
+    <h1>Sambaqui <em>Tower</em> House</h1>
+    <p class="hero-sub">Residencial de Alta Qualidade</p>
+    
+    <div class="hero-line">
+      <span>Guaratuba — SC</span>
+    </div>
+    
+    <p class="hero-desc">
+      Localizado em uma das regiões mais valorizadas de Guaratuba, o Sambaqui Tower House oferece 
+      um estilo de vida sofisticado com arquitetura moderna e acabamentos premium.
+    </p>
+    
+    <div class="hero-actions">
+      <a href="#contato" class="btn-primary">Agende Sua Visita</a>
+      <a href="#features" class="btn-outline">Conheça Mais</a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">45+</span>
+      <span class="stat-label">Unidades</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">12.500m²</span>
+      <span class="stat-label">Área Total</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">2024</span>
+      <span class="stat-label">Inauguração</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">⭐⭐⭐⭐⭐</span>
+      <span class="stat-label">Certificação</span>
+    </div>
+  </div>
+
+  <div class="wave-bottom">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,90.7C672,85,768,107,864,106.7C960,107,1056,85,1104,74.7L1152,64L1152,120L1104,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" fill="white"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="section" id="features">
+  <h2 class="section-title">Características <em>Premium</em></h2>
+  <p class="section-description">Cada detalhe foi cuidadosamente pensado para oferecer conforto e elegância</p>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <h3>🏗️ Arquitetura</h3>
+      <p>Design moderno com acabamentos em materiais de primeira qualidade, pensados para durabilidade e estética.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🛡️ Segurança</h3>
+      <p>Sistema 24/7 de monitoramento, portaria eletrônica e infraestrutura completa de proteção.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🌳 Sustentabilidade</h3>
+      <p>Energia solar, gestão inteligente de água e áreas verdes para um ambiente equilibrado.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🏊 Lazer</h3>
+      <p>Piscina aquecida, academia, espaço gourmet e áreas de convivência premium.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LOCALIZAÇÃO SECTION -->
+<section class="section" id="localizacao" style="background: var(--sand);">
+  <h2 class="section-title">Localização <em>Estratégica</em></h2>
+  <p class="section-description">A melhor região de Guaratuba para sua qualidade de vida</p>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <h3>📍 Centro de Guaratuba</h3>
+      <p>A apenas 5 minutos do centro comercial, com acesso fácil a restaurantes e comércios.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🏖️ Praias Próximas</h3>
+      <p>Distância privilegiada das principais praias de Guaratuba para seu descanso.</p>
+    </div>
+    <div class="feature-card">
+      <h3>🚗 Acessibilidade</h3>
+      <p>Conexão direta com BR-116 e acesso fácil a Curitiba, Litoral e demais regiões.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="section" id="contato">
+  <h2 class="section-title">Entre em <em>Contato</em></h2>
+  <p class="section-description">Agende sua visita e conheça pessoalmente o Sambaqui Tower House</p>
+  
+  <div style="text-align: center; margin-top: 3rem;">
+    <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+      <strong>Email:</strong> {{ config.get('site_email', 'contato@sambaquitorhouse.com') }}
+    </p>
+    <p style="font-size: 1.1rem; margin-bottom: 2rem;">
+      <strong>Telefone:</strong> {{ config.get('site_telefone', '+55 (41) XXXXX-XXXX') }}
+    </p>
+    <button class="btn-primary" onclick="alert('Sistema de agenda em desenvolvimento')">
+      Agendar Visita
+    </button>
+  </div>
+</section>
+{% endblock %}

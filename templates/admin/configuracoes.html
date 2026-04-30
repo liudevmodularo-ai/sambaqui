@@ -1,0 +1,59 @@
+{% extends "admin/dashboard.html" %}
+
+{% block title %}Configurações - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <ul class="admin-menu">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_paginas') }}">📄 Páginas</a></li>
+      <li><a href="{{ url_for('admin_imagens') }}">🖼️ Imagens</a></li>
+      <li><a href="{{ url_for('admin_configuracoes') }}" class="active">⚙️ Configurações</a></li>
+      <li><a href="{{ url_for('admin_seo') }}">🔍 SEO</a></li>
+      <li><hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.2);"></li>
+      <li><a href="{{ url_for('index') }}">🏠 Ver Site</a></li>
+      <li><a href="{{ url_for('admin_logout') }}" style="color: #ff6b6b;">🚪 Sair</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <div class="admin-header">
+      <h1>⚙️ Configurações do Site</h1>
+    </div>
+    
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      {% for config in configuracoes %}
+      <form method="POST" action="{{ url_for('admin_config_salvar', id=config.id) }}" 
+            style="display: grid; grid-template-columns: 2fr 3fr auto; gap: 1rem; align-items: end; 
+                   padding: 1.5rem 0; border-bottom: 1px solid #eee;">
+        <div>
+          <label style="display: block; font-weight: 600; color: var(--navy); margin-bottom: 0.3rem;">
+            {{ config.chave }}
+          </label>
+          <small style="color: #999;">{{ config.descricao }}</small>
+        </div>
+        
+        {% if config.tipo == 'string' and config.chave not in ['site_descricao'] %}
+          <input type="text" name="valor" value="{{ config.valor }}"
+                 style="padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+        {% elif config.tipo in ['text', 'json'] or config.chave in ['site_descricao'] %}
+          <textarea name="valor" rows="3"
+                    style="padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">{{ config.valor }}</textarea>
+        {% elif config.tipo == 'bool' %}
+          <select name="valor" style="padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="1" {% if config.valor == '1' %}selected{% endif %}>Ativado</option>
+            <option value="0" {% if config.valor == '0' %}selected{% endif %}>Desativado</option>
+          </select>
+        {% else %}
+          <input type="text" name="valor" value="{{ config.valor }}"
+                 style="padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+        {% endif %}
+        
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </form>
+      {% endfor %}
+    </div>
+  </main>
+</div>
+{% endblock %}

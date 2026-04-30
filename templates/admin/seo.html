@@ -1,0 +1,94 @@
+{% extends "admin/dashboard.html" %}
+
+{% block title %}SEO - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <ul class="admin-menu">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_paginas') }}">📄 Páginas</a></li>
+      <li><a href="{{ url_for('admin_imagens') }}">🖼️ Imagens</a></li>
+      <li><a href="{{ url_for('admin_configuracoes') }}">⚙️ Configurações</a></li>
+      <li><a href="{{ url_for('admin_seo') }}" class="active">🔍 SEO</a></li>
+      <li><hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.2);"></li>
+      <li><a href="{{ url_for('index') }}">🏠 Ver Site</a></li>
+      <li><a href="{{ url_for('admin_logout') }}" style="color: #ff6b6b;">🚪 Sair</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <div class="admin-header">
+      <h1>🔍 SEO & Otimizações</h1>
+    </div>
+    
+    <!-- SEO Stats -->
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <h3>{{ stats.total_paginas }}</h3>
+        <p>Total de Páginas</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.paginas_com_meta }}</h3>
+        <p>Páginas com Meta</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.total_imagens }}</h3>
+        <p>Total de Imagens</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.imagens_com_alt }}</h3>
+        <p>Imagens com Alt Text</p>
+      </div>
+    </div>
+    
+    <!-- SEO Resources -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+      <h2>🚀 Recursos de SEO</h2>
+      <div style="margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="padding: 1rem; background: #f0f0f0; border-radius: 4px;">
+          <h3>📋 Sitemap</h3>
+          <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">Gera um sitemap XML automaticamente</p>
+          <a href="/sitemap.xml" target="_blank" class="btn btn-primary" style="margin-top: 0.5rem;">Visualizar</a>
+        </div>
+        <div style="padding: 1rem; background: #f0f0f0; border-radius: 4px;">
+          <h3>🤖 Robots.txt</h3>
+          <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">Controla como os buscadores rastreiam seu site</p>
+          <a href="/robots.txt" target="_blank" class="btn btn-primary" style="margin-top: 0.5rem;">Visualizar</a>
+        </div>
+        <div style="padding: 1rem; background: #f0f0f0; border-radius: 4px;">
+          <h3>🔗 Google Search Console</h3>
+          <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">Submeta seu sitemap ao Google</p>
+          <a href="https://search.google.com/search-console" target="_blank" class="btn btn-primary" style="margin-top: 0.5rem;">Acessar</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div style="background: #e8f5e9; padding: 2rem; border-radius: 8px; border-left: 4px solid #4CAF50;">
+      <h2>📝 Próximas Etapas</h2>
+      <ul style="margin-left: 1.5rem; line-height: 2;">
+        <li>✓ Verifique se todas as páginas têm meta descrições</li>
+        <li>✓ Certifique-se de que todas as imagens têm alt text</li>
+        <li>✓ Integre Google Analytics em Configurações</li>
+        <li>✓ Envie o sitemap ao Google Search Console</li>
+        <li>✓ Configure SEO estruturado (Schema.org)</li>
+        <li>✓ Otimize velocidade de carregamento</li>
+        <li>✓ Crie conteúdo de qualidade regularmente</li>
+      </ul>
+    </div>
+    
+    <div style="background: #fff3e0; padding: 2rem; border-radius: 8px; border-left: 4px solid #ff9800; margin-top: 2rem;">
+      <h2>🎯 Recursos Futuros</h2>
+      <p>Em desenvolvimento:</p>
+      <ul style="margin-left: 1.5rem; line-height: 2;">
+        <li>• Integração com APIs de SEO</li>
+        <li>• Análise de palavras-chave</li>
+        <li>• Monitoramento de ranking</li>
+        <li>• Geração automática de backlinks</li>
+        <li>• Relatórios de tráfego</li>
+      </ul>
+    </div>
+  </main>
+</div>
+{% endblock %}

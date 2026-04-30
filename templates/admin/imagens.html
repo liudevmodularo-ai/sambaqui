@@ -1,0 +1,128 @@
+{% extends "admin/dashboard.html" %}
+
+{% block title %}Imagens - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <ul class="admin-menu">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_paginas') }}">📄 Páginas</a></li>
+      <li><a href="{{ url_for('admin_imagens') }}" class="active">🖼️ Imagens</a></li>
+      <li><a href="{{ url_for('admin_configuracoes') }}">⚙️ Configurações</a></li>
+      <li><a href="{{ url_for('admin_seo') }}">🔍 SEO</a></li>
+      <li><hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.2);"></li>
+      <li><a href="{{ url_for('index') }}">🏠 Ver Site</a></li>
+      <li><a href="{{ url_for('admin_logout') }}" style="color: #ff6b6b;">🚪 Sair</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <div class="admin-header">
+      <div>
+        <h1>🖼️ Gerenciar Imagens</h1>
+        <p>Upload, visualize e delete imagens do site</p>
+      </div>
+    </div>
+    
+    <!-- Upload Form -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+      <h2>📤 Upload de Imagem</h2>
+      <form id="upload-form" style="margin-top: 1rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Arquivo *</label>
+            <input type="file" id="arquivo" name="arquivo" required accept="image/*"
+                   style="width: 100%; padding: 0.8rem; border: 2px dashed #ddd; border-radius: 4px; cursor: pointer;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Tipo</label>
+            <select name="tipo" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="galeria">Galeria</option>
+              <option value="hero">Hero/Banner</option>
+              <option value="thumbnail">Thumbnail</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Título Alt (SEO)</label>
+          <input type="text" name="titulo_alt" placeholder="Descrição para acessibilidade"
+                 style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Descrição</label>
+          <textarea name="descricao" rows="3" placeholder="Descreva a imagem"
+                    style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">📤 Fazer Upload</button>
+      </form>
+    </div>
+    
+    <!-- Images List -->
+    <div class="recent-logs">
+      <h2>Imagens no Sistema</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Título Alt</th>
+            <th>Tamanho</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for imagem in imagens %}
+          <tr>
+            <td><strong>{{ imagem.nome_original }}</strong></td>
+            <td>{{ imagem.tipo }}</td>
+            <td>{{ imagem.titulo_alt or '-' }}</td>
+            <td>{{ "%.2f"|format(imagem.tamanho / 1024) }} KB</td>
+            <td>{{ imagem.criada_em.strftime('%d/%m/%Y') }}</td>
+            <td>
+              <a href="{{ imagem.caminho }}" target="_blank" class="btn btn-primary">Visualizar</a>
+              <form method="POST" action="{{ url_for('admin_imagem_deletar', id=imagem.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza?');">
+                <button type="submit" class="btn btn-danger">Deletar</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; color: #999;">Nenhuma imagem enviada</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script>
+  document.getElementById('upload-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('arquivo', document.getElementById('arquivo').files[0]);
+    formData.append('tipo', document.querySelector('select[name="tipo"]').value);
+    formData.append('titulo_alt', document.querySelector('input[name="titulo_alt"]').value);
+    formData.append('descricao', document.querySelector('textarea[name="descricao"]').value);
+    
+    try {
+      const response = await fetch('{{ url_for("admin_imagem_upload") }}', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        alert('✓ Imagem enviada com sucesso!');
+        location.reload();
+      } else {
+        alert('✗ Erro ao enviar imagem');
+      }
+    } catch (error) {
+      alert('✗ Erro: ' + error.message);
+    }
+  });
+</script>
+{% endblock %}

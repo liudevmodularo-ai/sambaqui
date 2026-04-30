@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sambaqui:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - SECRET_KEY=dev-key
+    volumes:
+      - .:/app
+    command: python app.py
+    restart: unless-stopped
+
+  # Nginx (opcional para desenvolvimento)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - sambaqui
+    restart: unless-stopped

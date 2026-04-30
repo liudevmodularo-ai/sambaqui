@@ -1,0 +1,70 @@
+{% extends "admin/dashboard.html" %}
+
+{% block title %}Páginas - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <ul class="admin-menu">
+      <li><a href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+      <li><a href="{{ url_for('admin_paginas') }}" class="active">📄 Páginas</a></li>
+      <li><a href="{{ url_for('admin_imagens') }}">🖼️ Imagens</a></li>
+      <li><a href="{{ url_for('admin_configuracoes') }}">⚙️ Configurações</a></li>
+      <li><a href="{{ url_for('admin_seo') }}">🔍 SEO</a></li>
+      <li><hr style="margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.2);"></li>
+      <li><a href="{{ url_for('index') }}">🏠 Ver Site</a></li>
+      <li><a href="{{ url_for('admin_logout') }}" style="color: #ff6b6b;">🚪 Sair</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <div class="admin-header">
+      <div>
+        <h1>📄 Gerenciar Páginas</h1>
+        <p>Crie, edite e delete as páginas do site</p>
+      </div>
+      <a href="{{ url_for('admin_pagina_nova') }}" class="btn btn-success">+ Nova Página</a>
+    </div>
+    
+    <div class="recent-logs">
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Slug</th>
+            <th>Status</th>
+            <th>Atualizado</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pagina in paginas %}
+          <tr>
+            <td><strong>{{ pagina.titulo }}</strong></td>
+            <td><code>{{ pagina.slug }}</code></td>
+            <td>
+              {% if pagina.ativa %}
+                <span style="color: var(--success);">✓ Ativa</span>
+              {% else %}
+                <span style="color: var(--error);">✗ Inativa</span>
+              {% endif %}
+            </td>
+            <td>{{ pagina.atualizada_em.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>
+              <a href="{{ url_for('admin_pagina_editar', id=pagina.id) }}" class="btn btn-primary">Editar</a>
+              <form method="POST" action="{{ url_for('admin_pagina_deletar', id=pagina.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza?');">
+                <button type="submit" class="btn btn-danger">Deletar</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" style="text-align: center; color: #999;">Nenhuma página criada</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+{% endblock %}

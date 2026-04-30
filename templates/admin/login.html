@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Login Administrativo - Sambaqui Tower House{% endblock %}
+
+{% block styles %}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --navy: #0b1f35;
+    --gold: #c9a96e;
+    --sand: #f5f0e8;
+  }
+  
+  body {
+    font-family: 'Raleway', sans-serif;
+    background: linear-gradient(135deg, var(--navy) 0%, #0d2a45 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-container {
+    background: white;
+    padding: 3rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 100%;
+    animation: slideIn 0.4s ease;
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .login-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+  
+  .login-header p {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+  }
+  
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.1);
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  button[type="submit"],
+  .btn {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  button[type="submit"] {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  
+  button[type="submit"]:hover {
+    background: #d4b896;
+    transform: translateY(-2px);
+  }
+  
+  .btn-back {
+    background: #f0f0f0;
+    color: var(--navy);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-back:hover {
+    background: #e0e0e0;
+  }
+  
+  .error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    border-left: 3px solid #c62828;
+  }
+  
+  .security-note {
+    background: var(--sand);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: #666;
+    border-left: 3px solid var(--gold);
+    line-height: 1.6;
+  }
+  
+  .security-note strong {
+    color: var(--navy);
+  }
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-header">
+    <h1>🔐 Administração</h1>
+    <p>Sambaqui Tower House</p>
+  </div>
+  
+  {% with messages = get_flashed_messages(category_filter=['error']) %}
+    {% if messages %}
+      <div class="error-message">
+        {{ messages[0] }}
+      </div>
+    {% endif %}
+  {% endwith %}
+  
+  <form method="POST" action="{{ url_for('admin_login') }}">
+    <div class="form-group">
+      <label for="username">Usuário</label>
+      <input type="text" id="username" name="username" required autofocus placeholder="Seu usuário">
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" name="password" required placeholder="Sua senha">
+    </div>
+    
+    <div class="form-actions">
+      <a href="{{ url_for('index') }}" class="btn btn-back">← Voltar</a>
+      <button type="submit">Entrar</button>
+    </div>
+  </form>
+  
+  <div class="security-note">
+    <strong>🔒 Segurança:</strong><br>
+    Esta área é protegida. Apenas administradores autorizados podem acessar. Suas credenciais são mantidas seguras.
+  </div>
+</div>
+{% endblock %}
